@@ -35,16 +35,85 @@ class LiteGraph
         $image = $this->canvasBuilder->getCanvas();
         $this->buildBackground($image);
 
-        $xAxis = (new AxisXBuilder());
 
-        $xAxis->setData(
-            $this->canvasBuilder->getWidth(),
-            $this->$this->dataArray
-        );
+        $hex = HexConverter::hexToRgb('#ff0000');
+        $red = imagecolorallocate($image, $hex['r'], $hex['g'], $hex['b']);
 
-//        imagesetpixel ( resource $image , int $x , int $y , int $color );
+        $newData = $this->convertData();
+
+//        var_dump($newData);
+
+        foreach ($newData as $index => $data) {
+            $this->drawPoint(
+                $image,
+                $data[0], //x
+                $data[1], // y
+                $red
+            );
+
+//            imagesetpixel($image, , , $red);
+        }
+
+
 
         return $image;
+    }
+
+    public function convertData()
+    {
+        $new = [];
+
+        $count = count($this->dataArray);
+        $maxX = $minX = null;
+        $maxY = $minY = null;
+
+        foreach ($this->dataArray as $data) {
+            if ($minX == null || $data[0] < $minX) {
+                $minX = $data[0];
+            }
+            if ($maxX == null || $data[0] > $maxX) {
+                $maxX = $data[0];
+            }
+
+            if ($minY == null || $data[1] < $minY) {
+                $minY = $data[1];
+            }
+            if ($maxY == null || $data[1] > $maxY) {
+                $maxY = $data[1];
+            }
+        }
+
+        $deltaX = $maxX - $minX;
+        //var_dump($deltaX);
+        $deltaY = $maxY - $minY;
+
+        $canvasWidth = $this->canvasBuilder->getWidth();
+        $canvasHeight = $this->canvasBuilder->getHeight();
+
+        $xCoof = intval($canvasWidth / $deltaX);
+        $yCoof = intval($canvasHeight / $deltaY);
+
+        $new = [];
+        foreach ($this->dataArray as $data) {
+            $new[] = [
+                ($data[0] - $minX) * $xCoof,
+                $canvasHeight - ($data[1]- $minY) * $yCoof
+            ];
+        }
+
+        return $new;
+    }
+
+    public function drawPoint($image, $x, $y, $color, $radius = 2)
+    {
+        imagefilledrectangle(
+            $image,
+            $x-$radius,
+            $y-$radius,
+            $x+$radius,
+            $y+$radius,
+            $color
+        );
     }
 
     /**

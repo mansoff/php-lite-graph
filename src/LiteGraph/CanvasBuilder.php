@@ -3,6 +3,7 @@
 namespace LiteGraph;
 
 /**
+ * TODO need canvas object
  * LiteGraph\CanvasBuilder
  */
 class CanvasBuilder
