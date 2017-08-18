@@ -1,22 +1,25 @@
 <?php
 
 //tmp hack
-require_once 'src/LiteGraph/AxisXBuilder.php';
-require_once 'src/LiteGraph/CanvasBuilder.php';
-require_once 'src/LiteGraph/HexConverter.php';
+
+require_once 'src/LiteGraph/Helper/Drawler.php';
+require_once 'src/LiteGraph/Helper/GraphLayer.php';
+require_once 'src/LiteGraph/Helper/CanvasConfig.php';
+require_once 'src/LiteGraph/Helper/CanvasBuilder.php';
+require_once 'src/LiteGraph/Helper/HexConverter.php';
 require_once 'src/LiteGraph/LiteGraph.php';
 
 ini_set("display_errors", "1");
 error_reporting(E_ALL);
 
-//Gmagick::
 header('content-type: image/png');
 
 use LiteGraph\LiteGraph;
-$graph = new LiteGraph();
-$graph->setCanvas(750, 300);
-$graph->setBackgroundColor('#ffffff');
-$graph->setData(
+
+
+$config = new \LiteGraph\Helper\CanvasConfig(750, 300);
+$graph1 = new \LiteGraph\Helper\GraphLayer();
+$graph1->setData(
     [
         [2006,700],
         [2007,600],
@@ -24,8 +27,14 @@ $graph->setData(
         [2009,650],
     ]
 );
+$graph1->setLineColor('#ff00ff');
+$graph1->setPointColor('#ff0000');
+$config->setLayers([$graph1]);
+$config->setBgColor('#ffffff');
 
-$image = $graph->build();
+
+$image = (new LiteGraph($config))
+    ->build();
 
 
 imagepng($image);

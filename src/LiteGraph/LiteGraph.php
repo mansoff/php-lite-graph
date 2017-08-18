@@ -1,6 +1,10 @@
 <?php
-
 namespace LiteGraph;
+
+use LiteGraph\Helper\CanvasConfig;
+use LiteGraph\Helper\CanvasBuilder;
+use LiteGraph\Helper\Drawler;
+use LiteGraph\Helper\HexConverter;
 
 /**
  * src\LiteGraph
@@ -8,66 +12,61 @@ namespace LiteGraph;
 class LiteGraph
 {
     /**
-     * @var CanvasBuilder
+     * @var CanvasConfig
      */
-    protected $canvasBuilder;
+    private $canvasConfig;
 
     /**
-     * @var string
+     * LiteGraph constructor.
+     * @param CanvasConfig $canvasConfig
      */
-    protected $bgColog;
-
-    /**
-     * @var array
-     */
-    protected $dataArray;
-
-    /**
-     *
-     */
-    public function __construct()
-    {
-        $this->canvasBuilder = new CanvasBuilder();
+    public function __construct(
+        CanvasConfig $canvasConfig
+    ) {
+        $this->canvasConfig = $canvasConfig;
     }
 
     public function build()
     {
-        $image = $this->canvasBuilder->getCanvas();
-        $this->buildBackground($image);
+        $canvas = $this->canvasConfig;
+        $image = (new CanvasBuilder())
+            ->getCanvas($canvas);
+
+        $this->setColor($image, $canvas->getBgColor());
 
 
         $hex = HexConverter::hexToRgb('#ff0000');
         $red = imagecolorallocate($image, $hex['r'], $hex['g'], $hex['b']);
 
-        $newData = $this->convertData();
+        $newData = $this->convertData($canvas);
 
-//        var_dump($newData);
+        $drawler = new Drawler();
 
         foreach ($newData as $index => $data) {
-            $this->drawPoint(
+            $drawler->drawPoint(
                 $image,
                 $data[0], //x
                 $data[1], // y
                 $red
             );
-
-//            imagesetpixel($image, , , $red);
         }
-
-
 
         return $image;
     }
 
-    public function convertData()
+    public function convertData(CanvasConfig $canvas)
     {
+        $dataArray = $this->canvasConfig
+            ->getLayers()[0]
+            ->getData();
+
         $new = [];
 
-        $count = count($this->dataArray);
+        $count = count($dataArray);
         $maxX = $minX = null;
         $maxY = $minY = null;
 
-        foreach ($this->dataArray as $data) {
+        foreach ($dataArray as $data) {
             if ($minX == null || $data[0] < $minX) {
                 $minX = $data[0];
             }
@@ -87,14 +86,14 @@ class LiteGraph
         //var_dump($deltaX);
         $deltaY = $maxY - $minY;
 
-        $canvasWidth = $this->canvasBuilder->getWidth();
-        $canvasHeight = $this->canvasBuilder->getHeight();
+        $canvasWidth = $canvas->getWidth();
+        $canvasHeight = $canvas->getHeight();
 
         $xCoof = intval($canvasWidth / $deltaX);
         $yCoof = intval($canvasHeight / $deltaY);
 
         $new = [];
-        foreach ($this->dataArray as $data) {
+        foreach ($dataArray as $data) {
             $new[] = [
                 ($data[0] - $minX) * $xCoof,
                 $canvasHeight - ($data[1]- $minY) * $yCoof
@@ -104,47 +103,10 @@ class LiteGraph
         return $new;
     }
 
-    public function drawPoint($image, $x, $y, $color, $radius = 2)
+    protected function setColor($image, $color)
     {
-        imagefilledrectangle(
-            $image,
-            $x-$radius,
-            $y-$radius,
-            $x+$radius,
-            $y+$radius,
-            $color
-        );
-    }
-
-    /**
-     * @param string $hexColor
-     */
-    public function setBackgroundColor($hexColor)
-    {
-        $this->bgColog = $hexColor;
-    }
-
-    /**
-     * @param int $width
-     * @param int $height
-     */
-    public function setCanvas($width, $height)
-    {
-        $this->canvasBuilder
-            ->setWidth(intval($width));
-        $this->canvasBuilder
-            ->setHeight(intval($height));
-    }
-
-    public function setData($data)
-    {
-        $this->dataArray = $data;
-    }
-
-    protected function buildBackground($image)
-    {
-        $hex = HexConverter::hexToRgb($this->bgColog);
-        imagecolorallocate($image, $hex['r'], $hex['g'], $hex['b']);
+        $hex = HexConverter::hexToRgb($color);
+        return imagecolorallocate($image, $hex['r'], $hex['g'], $hex['b']);
     }
 
     public function getName()

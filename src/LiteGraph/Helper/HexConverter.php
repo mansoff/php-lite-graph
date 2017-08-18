@@ -1,6 +1,6 @@
 <?php
 
-namespace LiteGraph;
+namespace LiteGraph\Helper;
 
 /**
  * LiteGraph\HexConverter
