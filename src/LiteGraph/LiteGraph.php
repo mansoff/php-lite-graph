@@ -3,8 +3,8 @@ namespace LiteGraph;
 
 use LiteGraph\Helper\CanvasConfig;
 use LiteGraph\Helper\CanvasBuilder;
+use LiteGraph\Helper\ColorConverter;
 use LiteGraph\Helper\Drawler;
-use LiteGraph\Helper\HexConverter;
 
 /**
  * src\LiteGraph
@@ -28,27 +28,29 @@ class LiteGraph
 
     public function build()
     {
-        $canvas = $this->canvasConfig;
+        $config = $this->canvasConfig;
         $image = (new CanvasBuilder())
-            ->getCanvas($canvas);
+            ->getCanvas($config);
 
-        $this->setColor($image, $canvas->getBgColor());
+        $this->setBackgroundColor($image, $config->getBgColor());
+        $layers = $config->getLayers();
 
-
-        $hex = HexConverter::hexToRgb('#ff0000');
-        $red = imagecolorallocate($image, $hex['r'], $hex['g'], $hex['b']);
-
-        $newData = $this->convertData($canvas);
-
-        $drawler = new Drawler();
-
-        foreach ($newData as $index => $data) {
-            $drawler->drawPoint(
-                $image,
-                $data[0], //x
-                $data[1], // y
-                $red
+        foreach ($layers as $layer) {
+            $pointColor = ColorConverter::convert(
+                $layer->getPointColor(),
+                $image
             );
+
+            $newData = $this->convertData($config);
+            $drawler = new Drawler();
+            foreach ($newData as $index => $data) {
+                $drawler->drawPoint(
+                    $image,
+                    $data[0], //x
+                    $data[1], // y
+                    $pointColor
+                );
+            }
         }
 
         return $image;
@@ -60,9 +62,6 @@ class LiteGraph
             ->getLayers()[0]
             ->getData();
 
-        $new = [];
-
-        $count = count($dataArray);
         $maxX = $minX = null;
         $maxY = $minY = null;
 
@@ -83,7 +82,6 @@ class LiteGraph
         }
 
         $deltaX = $maxX - $minX;
-        //var_dump($deltaX);
         $deltaY = $maxY - $minY;
 
         $canvasWidth = $canvas->getWidth();
@@ -103,10 +101,15 @@ class LiteGraph
         return $new;
     }
 
-    protected function setColor($image, $color)
+    /**
+     * @param resource $image
+     * @param string $color
+     *
+     * @return int
+     */
+    protected function setBackgroundColor($image, $color)
     {
-        $hex = HexConverter::hexToRgb($color);
-        return imagecolorallocate($image, $hex['r'], $hex['g'], $hex['b']);
+        return ColorConverter::convert($color, $image);
     }
 
     public function getName()

@@ -1,24 +1,19 @@
 <?php
+require __DIR__ . '/vendor/autoload.php';
 
-//tmp hack
 
-require_once 'src/LiteGraph/Helper/Drawler.php';
-require_once 'src/LiteGraph/Helper/GraphLayer.php';
-require_once 'src/LiteGraph/Helper/CanvasConfig.php';
-require_once 'src/LiteGraph/Helper/CanvasBuilder.php';
-require_once 'src/LiteGraph/Helper/HexConverter.php';
-require_once 'src/LiteGraph/LiteGraph.php';
+use LiteGraph\Helper\CanvasConfig;
+use LiteGraph\Helper\GraphLayer;
+use LiteGraph\LiteGraph;
 
 ini_set("display_errors", "1");
 error_reporting(E_ALL);
 
 header('content-type: image/png');
 
-use LiteGraph\LiteGraph;
 
-
-$config = new \LiteGraph\Helper\CanvasConfig(750, 300);
-$graph1 = new \LiteGraph\Helper\GraphLayer();
+$config = new CanvasConfig(750, 300);
+$graph1 = new GraphLayer();
 $graph1->setData(
     [
         [2006,700],

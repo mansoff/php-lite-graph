@@ -1,0 +1,11 @@
+{
+    "name": "mans/php-lite-graph",
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {"LiteGraph\\": "src/LiteGraph"}
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^3.4"
+    }
+}
