@@ -40,16 +40,32 @@ class LiteGraph
                 $layer->getPointColor(),
                 $image
             );
+            $lineColor = ColorConverter::convert(
+                $layer->getLineColor(),
+                $image
+            );
 
             $newData = $this->convertData($config);
             $drawler = new Drawler();
+            $pointsCount = count($newData);
             foreach ($newData as $index => $data) {
+                if ($index+1 < $pointsCount) {
+                    $drawler->drawLine(
+                        $image,
+                        $data[0], //x
+                        $data[1], // y
+                        $newData[$index+1][0], //x
+                        $newData[$index+1][1], // y
+                        $lineColor
+                    );
+                }
                 $drawler->drawPoint(
                     $image,
                     $data[0], //x
                     $data[1], // y
                     $pointColor
                 );
+
             }
         }
 

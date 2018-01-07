@@ -28,4 +28,15 @@ class Drawler
             $color
         );
     }
+
+    public function drawLine(
+        $image,
+        $x,
+        $y,
+        $x2,
+        $y2,
+        $color
+    ) {
+        return imageline($image, $x, $y , $x2 , $y2 , $color);
+    }
 }
